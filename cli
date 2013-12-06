@@ -1,0 +1,35 @@
+#user/bin!
+
+puts "Input your email:"
+email = gets.chomp
+user = User.where(:email => email).first # find user with email
+if user.nil?
+  # puts "Email not found"
+  user = User.new
+  user.email = email
+end
+
+puts "What do you want to do?"
+puts "0. Create shortened URL"
+puts "1. Visit shortened URL"
+option = Integer(gets.chomp)
+case option
+when 0
+  # create shortened url
+  puts "Type in your long url"
+  long_url = gets.chomp
+  short_url = ShortenedUrl.create_for_user_and_long_url!(user, long_url)
+                          .short_url
+  puts "Short url is: #{short_url}"
+when 1
+  # visit shortened url
+  puts "Type in the shortened URL"
+  short_url = gets.chomp
+  shortened_url = ShortenedUrl.where(:short_url => short_url).first
+  long_url = shortened_url.long_url
+  puts "Long url is: #{long_url}"
+  # use launchy gem to open url in browser
+  Launchy.open( long_url )
+  # record visit
+  Visit.record_visit!(user, shortened_url)
+end
